@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Category</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: "Space Grotesk", sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-cyan-50 text-slate-800">
+<div class="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-2xl shadow-emerald-100 sm:p-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">Category Form</p>
+        <h1 class="mt-1 text-3xl font-bold text-slate-900">Create Category</h1>
+
+        <form th:action="@{/categories/create}" th:object="${category}" method="post" class="mt-6 space-y-5">
+            <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">Category Name</label>
+                <input type="text" th:field="*{name}"
+                       class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none ring-emerald-500 transition focus:ring-2">
+                <div class="mt-1 text-sm text-rose-600" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <a th:href="@{/categories}"
+                   class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                    Save Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
