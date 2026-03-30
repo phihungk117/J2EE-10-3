@@ -26,29 +26,34 @@ public class OrderService {
     private AccountRepository accountRepository;
 
     public void checkout(Account account, List<CartItem> cartItems) {
-        if (cartItems == null || cartItems.isEmpty()) return;
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new IllegalArgumentException("Giỏ hàng trống!");
+        }
 
+        // 1. Tính tổng tiền (Calculate Total Amount)
+        double totalAmount = cartItems.stream()
+                                      .mapToDouble(CartItem::getSubtotal)
+                                      .sum();
+
+        // 2. Tạo Order (Create Order)
         Order order = new Order();
         order.setAccount(account);
         order.setOrderDate(new Date());
-
-        double totalAmount = 0;
-        for (CartItem item : cartItems) {
-            totalAmount += item.getSubtotal();
-        }
         order.setTotalAmount(totalAmount);
 
-        // Save order first to generate ID
+        // Lưu Order để lấy ID tự tăng
         Order savedOrder = orderRepository.save(order);
 
-        // Save order details
-        for (CartItem item : cartItems) {
+        // 3. Lưu Order Detail (Save Order Details)
+        List<OrderDetail> orderDetails = cartItems.stream().map(item -> {
             OrderDetail detail = new OrderDetail();
             detail.setOrder(savedOrder);
             detail.setProduct(item.getProduct());
             detail.setQuantity(item.getQuantity());
             detail.setPrice(item.getProduct().getPrice());
-            orderDetailRepository.save(detail);
-        }
+            return detail;
+        }).toList();
+
+        orderDetailRepository.saveAll(orderDetails);
     }
 }

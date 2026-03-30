@@ -6,6 +6,7 @@ import com.example.demo.service.CategoryService;
 import com.example.demo.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,8 +29,26 @@ public class ProductController {
     private CategoryService categoryService;
 
     @GetMapping("")
-    public String index(Model model) {
-        model.addAttribute("listproduct", productService.getAllProducts());
+    public String index(
+            @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "categoryId", required = false) Integer categoryId,
+            @RequestParam(value = "sortBy", required = false) String sortBy,
+            Model model) {
+        int pageSize = 5;
+        Page<Product> page = productService.findPaginated(pageNo, pageSize, keyword, categoryId, sortBy);
+
+        model.addAttribute("listproduct", page.getContent());
+        model.addAttribute("currentPage", pageNo);
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("totalItems", page.getTotalElements());
+        
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("sortBy", sortBy);
+        
+        model.addAttribute("listCategory", categoryService.getAllCategories());
+
         return "products"; 
     }
 

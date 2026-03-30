@@ -36,6 +36,52 @@
             </div>
         </div>
 
+        <!-- Success Message Alert -->
+        <div th:if="${checkoutSuccessMsg != null}" class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-sm">
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <p class="font-bold text-lg">Đặt hàng thành công!</p>
+                    <p class="text-sm mt-1" th:text="${checkoutSuccessMsg}"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Form -->
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <form th:action="@{/products}" method="get" class="flex flex-col sm:flex-row w-full gap-3">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search products by name..."
+                       class="w-full sm:w-64 rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                
+                <select name="categoryId" class="w-full sm:w-48 rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                    <option value="">All Categories</option>
+                    <option th:each="cat : ${listCategory}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${categoryId == cat.id}"></option>
+                </select>
+
+                <select name="sortBy" class="w-full sm:w-48 rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                    <option value="" th:selected="${sortBy == null or sortBy == ''}">Default Sort</option>
+                    <option value="price_asc" th:selected="${sortBy == 'price_asc'}">Price: Low to High</option>
+                    <option value="price_desc" th:selected="${sortBy == 'price_desc'}">Price: High to Low</option>
+                </select>
+
+                <div class="flex gap-2">
+                    <button type="submit"
+                            class="inline-flex rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-700">
+                        Filter & Sort
+                    </button>
+                    <a th:if="${(keyword != null and keyword != '') or (categoryId != null) or (sortBy != null and sortBy != '')}" th:href="@{/products}"
+                       class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Clear
+                    </a>
+                </div>
+            </form>
+            <div class="mt-4 sm:mt-0 text-sm text-slate-500 whitespace-nowrap hidden lg:block" th:if="${totalItems != null}">
+                Found <span class="font-bold text-slate-800" th:text="${totalItems}"></span> products
+            </div>
+        </div>
+
         <div class="overflow-hidden rounded-2xl border border-slate-200">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200">
@@ -91,6 +137,58 @@
                 </table>
             </div>
         </div>
+
+        <!-- Pagination -->
+        <div th:if="${totalPages > 1}" class="mt-8 flex items-center justify-between border-t border-slate-200 pt-6">
+            <div class="flex flex-1 justify-between sm:hidden">
+                <a th:href="@{/products(pageNo=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sortBy=${sortBy})}"
+                   th:classappend="${currentPage == 1} ? 'pointer-events-none opacity-50' : ''"
+                   class="relative inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Previous
+                </a>
+                <a th:href="@{/products(pageNo=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sortBy=${sortBy})}"
+                   th:classappend="${currentPage == totalPages} ? 'pointer-events-none opacity-50' : ''"
+                   class="relative ml-3 inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Next
+                </a>
+            </div>
+            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-slate-700">
+                        Showing page <span class="font-medium" th:text="${currentPage}"></span> of
+                        <span class="font-medium" th:text="${totalPages}"></span>
+                    </p>
+                </div>
+                <div>
+                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                        <a th:href="@{/products(pageNo=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sortBy=${sortBy})}"
+                           th:classappend="${currentPage == 1} ? 'pointer-events-none opacity-50' : ''"
+                           class="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Previous</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+
+                        <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+                           th:href="@{/products(pageNo=${i}, keyword=${keyword}, categoryId=${categoryId}, sortBy=${sortBy})}"
+                           th:text="${i}"
+                           th:classappend="${currentPage == i} ? 'relative z-10 inline-flex items-center bg-orange-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600' : 'relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0'"
+                           class="">1</a>
+
+                        <a th:href="@{/products(pageNo=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sortBy=${sortBy})}"
+                           th:classappend="${currentPage == totalPages} ? 'pointer-events-none opacity-50' : ''"
+                           class="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Next</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 </body>

@@ -83,7 +83,7 @@ public class CartController {
     }
 
     @PostMapping("/checkout")
-    public String checkout(HttpSession session, Principal principal) {
+    public String checkout(HttpSession session, Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
         if (cart != null && !cart.isEmpty() && principal != null) {
             String username = principal.getName();
@@ -91,9 +91,25 @@ public class CartController {
                             .orElse(null);
             
             if (account != null) {
+                // Tính toán thông báo thành công trước khi xóa giỏ hàng
+                StringBuilder successMsg = new StringBuilder("Bạn đã đặt thành công: ");
+                double total = 0;
+                for (int i = 0; i < cart.size(); i++) {
+                    CartItem item = cart.get(i);
+                    successMsg.append(item.getProduct().getName())
+                              .append(" (số lượng: ").append(item.getQuantity()).append(")");
+                    if (i < cart.size() - 1) {
+                        successMsg.append(", ");
+                    }
+                    total += item.getSubtotal();
+                }
+                successMsg.append(". Tổng tiền: $").append(String.format("%.2f", total));
+
                 orderService.checkout(account, cart);
                 session.removeAttribute("cart");
-                return "redirect:/products?checkoutSuccess";
+                
+                redirectAttributes.addFlashAttribute("checkoutSuccessMsg", successMsg.toString());
+                return "redirect:/products";
             }
         }
         return "redirect:/cart?checkoutError";
